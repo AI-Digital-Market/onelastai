@@ -1,315 +1,360 @@
+import React, { useState } from 'react';
 import Head from 'next/head';
-import { useState } from 'react';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import AgentPageLayout from '../../components/AgentPageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { motion } from 'framer-motion';
+import { Input } from '../../components/ui/input';
+import { GlobeAltIcon, ShieldCheckIcon, MagnifyingGlassIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
-export default function IPInfoTracker() {
-  const [ipInput, setIpInput] = useState('');
+export default function IPInfoModule() {
+  const [ipAddress, setIpAddress] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [ipData, setIpData] = useState(null);
-  const [userIP, setUserIP] = useState('192.168.1.1'); // Mock user IP
+  const [analysis, setAnalysis] = useState(null);
 
   const analyzeIP = async () => {
-    if (!ipInput.trim()) return;
+    if (!ipAddress.trim()) return;
     
     setIsAnalyzing(true);
-    try {
-      // Mock IP analysis - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setIpData({
-        ip: ipInput,
-        country: 'United States',
-        region: 'California',
-        city: 'San Francisco',
-        latitude: 37.7749,
-        longitude: -122.4194,
-        timezone: 'America/Los_Angeles',
-        isp: 'Cloudflare Inc.',
-        organization: 'Cloudflare',
-        asn: 'AS13335',
-        threatLevel: 'Low',
-        vpnDetected: false,
-        proxyDetected: false,
-        torDetected: false,
-        securityScore: 95
-      });
-    } catch (error) {
-      console.error('IP analysis failed:', error);
-    } finally {
+    
+    // Simulate IP analysis
+    setTimeout(() => {
+      const mockData = {
+        ip: ipAddress,
+        location: {
+          country: 'United States',
+          countryCode: 'US',
+          region: 'California',
+          city: 'San Francisco',
+          zipCode: '94102',
+          coordinates: { lat: 37.7749, lon: -122.4194 },
+          timezone: 'America/Los_Angeles'
+        },
+        network: {
+          isp: 'Cloudflare, Inc.',
+          organization: 'Cloudflare',
+          asn: 'AS13335',
+          domain: 'cloudflare.com',
+          type: 'hosting'
+        },
+        security: {
+          threat: Math.random() > 0.7 ? 'medium' : 'low',
+          isProxy: Math.random() > 0.8,
+          isVPN: Math.random() > 0.9,
+          isTor: false,
+          reputation: Math.random() > 0.3 ? 'good' : 'suspicious',
+          blacklisted: false
+        },
+        usage: {
+          mobile: Math.random() > 0.6,
+          proxy: Math.random() > 0.8,
+          hosting: Math.random() > 0.5
+        }
+      };
+      
+      setAnalysis(mockData);
       setIsAnalyzing(false);
-    }
+    }, 2500);
   };
 
-  const getMyIP = async () => {
-    setIsAnalyzing(true);
-    // Mock getting user's IP
-    setTimeout(() => {
-      setIpInput(userIP);
-      setIsAnalyzing(false);
-    }, 1000);
+  const detectMyIP = async () => {
+    setIpAddress('192.168.1.1');
+    // In real implementation, you'd fetch the user's actual IP
   };
+
+  const getThreatLevel = (level) => {
+    const levels = {
+      low: { color: 'text-green-400', bg: 'bg-green-500/20', icon: '🟢' },
+      medium: { color: 'text-yellow-400', bg: 'bg-yellow-500/20', icon: '🟡' },
+      high: { color: 'text-red-400', bg: 'bg-red-500/20', icon: '🔴' }
+    };
+    return levels[level] || levels.low;
+  };
+
+  const agentData = {
+    id: 'ipinfo',
+    name: 'IP Intelligence',
+    description: 'Comprehensive IP address analysis system providing geolocation, network information, security assessment, and threat intelligence for cybersecurity and network administration.',
+    icon: '🌐',
+    gradient: 'from-orange-500 to-red-600',
+    features: [
+      'Real-time IP geolocation and mapping',
+      'ISP and network organization detection',
+      'VPN, proxy, and Tor identification',
+      'Security threat assessment and reputation scoring',
+      'Network topology and routing analysis',
+      'Bulk IP analysis and monitoring tools'
+    ]
+  };
+
+  const IPDemo = () => (
+    <div className="space-y-6">
+      {/* Input Section */}
+      <Card className="bg-gray-900/50 border-gray-700/50">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center">
+            <GlobeAltIcon className="w-5 h-5 mr-2 text-orange-400" />
+            IP Address Analysis
+          </CardTitle>
+          <CardDescription className="text-gray-400">
+            Enter an IP address to get detailed location, network, and security information
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              value={ipAddress}
+              onChange={(e) => setIpAddress(e.target.value)}
+              placeholder="Enter IP address (e.g., 8.8.8.8)"
+              className="flex-1 bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+            />
+            <Button
+              onClick={detectMyIP}
+              variant="outline"
+              className="border-gray-600 hover:bg-gray-700"
+            >
+              My IP
+            </Button>
+            <Button
+              onClick={analyzeIP}
+              disabled={!ipAddress.trim() || isAnalyzing}
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:opacity-90"
+            >
+              {isAnalyzing ? (
+                <>
+                  <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <MagnifyingGlassIcon className="w-4 h-4 mr-2" />
+                  Analyze
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Quick Examples */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {[
+              { ip: '8.8.8.8', name: 'Google DNS' },
+              { ip: '1.1.1.1', name: 'Cloudflare' },
+              { ip: '208.67.222.222', name: 'OpenDNS' },
+              { ip: '9.9.9.9', name: 'Quad9' }
+            ].map((example, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                onClick={() => setIpAddress(example.ip)}
+                className="border-gray-600 hover:bg-gray-700 text-xs"
+              >
+                {example.name}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Analysis Results */}
+      {analysis && (
+        <div className="space-y-6">
+          {/* Location Information */}
+          <Card className="bg-gray-900/50 border-gray-700/50">
+            <CardHeader>
+              <CardTitle className="text-white">📍 Location Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Country:</span>
+                    <span className="text-white">{analysis.location.country}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Region:</span>
+                    <span className="text-white">{analysis.location.region}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">City:</span>
+                    <span className="text-white">{analysis.location.city}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">ZIP Code:</span>
+                    <span className="text-white">{analysis.location.zipCode}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Latitude:</span>
+                    <span className="text-white">{analysis.location.coordinates.lat}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Longitude:</span>
+                    <span className="text-white">{analysis.location.coordinates.lon}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Timezone:</span>
+                    <span className="text-white">{analysis.location.timezone}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Country Code:</span>
+                    <span className="text-white">{analysis.location.countryCode}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Network Information */}
+          <Card className="bg-gray-900/50 border-gray-700/50">
+            <CardHeader>
+              <CardTitle className="text-white">🌐 Network Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">ISP:</span>
+                    <span className="text-white">{analysis.network.isp}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Organization:</span>
+                    <span className="text-white">{analysis.network.organization}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">ASN:</span>
+                    <span className="text-white">{analysis.network.asn}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Domain:</span>
+                    <span className="text-white">{analysis.network.domain}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Security Assessment */}
+          <Card className="bg-gray-900/50 border-gray-700/50">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center">
+                <ShieldCheckIcon className="w-5 h-5 mr-2 text-orange-400" />
+                Security Assessment
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Threat Level */}
+                <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
+                  <span className="text-gray-300">Threat Level</span>
+                  <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${getThreatLevel(analysis.security.threat).bg}`}>
+                    <span>{getThreatLevel(analysis.security.threat).icon}</span>
+                    <span className={`capitalize ${getThreatLevel(analysis.security.threat).color}`}>
+                      {analysis.security.threat}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Security Checks */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400">Proxy Detection:</span>
+                      <span className={analysis.security.isProxy ? 'text-yellow-400' : 'text-green-400'}>
+                        {analysis.security.isProxy ? '⚠️ Detected' : '✅ Clean'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400">VPN Detection:</span>
+                      <span className={analysis.security.isVPN ? 'text-yellow-400' : 'text-green-400'}>
+                        {analysis.security.isVPN ? '⚠️ Detected' : '✅ Clean'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400">Tor Exit Node:</span>
+                      <span className={analysis.security.isTor ? 'text-red-400' : 'text-green-400'}>
+                        {analysis.security.isTor ? '🚫 Detected' : '✅ Clean'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400">Reputation:</span>
+                      <span className={analysis.security.reputation === 'good' ? 'text-green-400' : 'text-yellow-400'}>
+                        {analysis.security.reputation === 'good' ? '✅ Good' : '⚠️ Suspicious'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400">Blacklisted:</span>
+                      <span className={analysis.security.blacklisted ? 'text-red-400' : 'text-green-400'}>
+                        {analysis.security.blacklisted ? '🚫 Yes' : '✅ No'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400">Mobile Network:</span>
+                      <span className="text-gray-300">
+                        {analysis.usage.mobile ? '📱 Yes' : '🖥️ No'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Usage Analysis */}
+          <Card className="bg-gray-900/50 border-gray-700/50">
+            <CardHeader>
+              <CardTitle className="text-white">📊 Usage Analysis</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gray-800/50 p-4 rounded-lg text-center">
+                  <div className="text-2xl mb-2">📱</div>
+                  <div className="text-white font-medium">Mobile</div>
+                  <div className="text-gray-400 text-sm">
+                    {analysis.usage.mobile ? 'Detected' : 'Not Detected'}
+                  </div>
+                </div>
+                <div className="bg-gray-800/50 p-4 rounded-lg text-center">
+                  <div className="text-2xl mb-2">🔒</div>
+                  <div className="text-white font-medium">Proxy</div>
+                  <div className="text-gray-400 text-sm">
+                    {analysis.usage.proxy ? 'Active' : 'Not Active'}
+                  </div>
+                </div>
+                <div className="bg-gray-800/50 p-4 rounded-lg text-center">
+                  <div className="text-2xl mb-2">🏢</div>
+                  <div className="text-white font-medium">Hosting</div>
+                  <div className="text-gray-400 text-sm">
+                    {analysis.usage.hosting ? 'Data Center' : 'Residential'}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
       <Head>
-        <title>IP Info Tracker - Advanced IP Intelligence | onelastai.com</title>
-        <meta name="description" content="Get detailed information about any IP address including location, ISP, security status, and threat analysis." />
+        <title>IP Intelligence - Network Analysis & Security | onelastai.com</title>
+        <meta name="description" content="Advanced IP address intelligence with geolocation, network analysis, and security threat assessment." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-slate-900 dark:to-slate-800">
-        <Header />
-        
-        <main className="pt-20 pb-16 px-4">
-          <div className="max-w-6xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center mb-12"
-            >
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-xl">
-                  <span className="text-2xl text-white">🌐</span>
-                </div>
-                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                  IP Info Tracker
-                </h1>
-              </div>
-              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                Advanced IP intelligence and geolocation tracking with security analysis
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Input Section */}
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <Card className="h-full">
-                  <CardHeader>
-                    <CardTitle>IP Address Lookup</CardTitle>
-                    <CardDescription>
-                      Enter any IP address to get detailed information
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">IP Address</label>
-                      <input
-                        type="text"
-                        value={ipInput}
-                        onChange={(e) => setIpInput(e.target.value)}
-                        placeholder="8.8.8.8"
-                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      />
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={analyzeIP}
-                        disabled={!ipInput.trim() || isAnalyzing}
-                        className="flex-1"
-                      >
-                        {isAnalyzing ? (
-                          <>
-                            <span className="animate-spin mr-2">⚡</span>
-                            Analyzing...
-                          </>
-                        ) : (
-                          <>
-                            <span className="mr-2">🔍</span>
-                            Analyze IP
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={getMyIP}
-                        disabled={isAnalyzing}
-                      >
-                        <span className="mr-2">📍</span>
-                        My IP
-                      </Button>
-                    </div>
-
-                    {/* Quick IP Examples */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Quick Examples</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {['8.8.8.8', '1.1.1.1', '208.67.222.222', '76.76.19.19'].map((ip) => (
-                          <button
-                            key={ip}
-                            onClick={() => setIpInput(ip)}
-                            className="p-2 text-sm border rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                          >
-                            {ip}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {/* Results Section */}
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                <Card className="h-full">
-                  <CardHeader>
-                    <CardTitle>IP Information</CardTitle>
-                    <CardDescription>
-                      Detailed analysis and security assessment
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {ipData ? (
-                      <div className="space-y-6">
-                        {/* Location Info */}
-                        <div>
-                          <h4 className="font-semibold mb-3 text-green-600">📍 Location Information</h4>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                              <div className="text-sm text-gray-600">Country</div>
-                              <div className="font-medium">{ipData.country}</div>
-                            </div>
-                            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                              <div className="text-sm text-gray-600">Region</div>
-                              <div className="font-medium">{ipData.region}</div>
-                            </div>
-                            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                              <div className="text-sm text-gray-600">City</div>
-                              <div className="font-medium">{ipData.city}</div>
-                            </div>
-                            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                              <div className="text-sm text-gray-600">Timezone</div>
-                              <div className="font-medium">{ipData.timezone}</div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Network Info */}
-                        <div>
-                          <h4 className="font-semibold mb-3 text-blue-600">🌐 Network Information</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                              <span className="text-sm">ISP:</span>
-                              <span className="font-medium">{ipData.isp}</span>
-                            </div>
-                            <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                              <span className="text-sm">Organization:</span>
-                              <span className="font-medium">{ipData.organization}</span>
-                            </div>
-                            <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                              <span className="text-sm">ASN:</span>
-                              <span className="font-medium">{ipData.asn}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Security Analysis */}
-                        <div>
-                          <h4 className="font-semibold mb-3 text-red-600">🔒 Security Analysis</h4>
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                              <span>Security Score</span>
-                              <div className="flex items-center gap-2">
-                                <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                  <div 
-                                    className="h-full bg-green-500 transition-all duration-1000"
-                                    style={{ width: `${ipData.securityScore}%` }}
-                                  />
-                                </div>
-                                <span className="font-bold text-green-600">{ipData.securityScore}%</span>
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-3 gap-2">
-                              <div className={`p-2 rounded text-center text-sm ${
-                                ipData.vpnDetected ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                              }`}>
-                                <div className="font-medium">VPN</div>
-                                <div>{ipData.vpnDetected ? '❌ Detected' : '✅ Clean'}</div>
-                              </div>
-                              <div className={`p-2 rounded text-center text-sm ${
-                                ipData.proxyDetected ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                              }`}>
-                                <div className="font-medium">Proxy</div>
-                                <div>{ipData.proxyDetected ? '❌ Detected' : '✅ Clean'}</div>
-                              </div>
-                              <div className={`p-2 rounded text-center text-sm ${
-                                ipData.torDetected ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                              }`}>
-                                <div className="font-medium">Tor</div>
-                                <div>{ipData.torDetected ? '❌ Detected' : '✅ Clean'}</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center text-gray-500 py-12">
-                        <span className="text-4xl mb-4 block">🌍</span>
-                        <p>Enter an IP address to see detailed information</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
-
-            {/* Features Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="mt-12"
-            >
-              <h2 className="text-2xl font-bold text-center mb-8">IP Intelligence Features</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  {
-                    icon: '📍',
-                    title: 'Geolocation',
-                    description: 'Precise location tracking with city-level accuracy'
-                  },
-                  {
-                    icon: '🛡️',
-                    title: 'Threat Detection',
-                    description: 'Advanced security analysis and threat assessment'
-                  },
-                  {
-                    icon: '🔍',
-                    title: 'ISP Information',
-                    description: 'Complete network provider and organization details'
-                  },
-                  {
-                    icon: '⚡',
-                    title: 'Real-time Data',
-                    description: 'Live IP intelligence with instant results'
-                  }
-                ].map((feature, index) => (
-                  <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow">
-                    <div className="text-3xl mb-4">{feature.icon}</div>
-                    <h3 className="font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-sm text-gray-600">{feature.description}</p>
-                  </Card>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </main>
-
-        <Footer />
-      </div>
+      <AgentPageLayout agent={agentData}>
+        <IPDemo />
+      </AgentPageLayout>
     </>
   );
 }
