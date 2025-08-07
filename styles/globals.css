@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import modern theme */
+@import './theme.css';
+
 :root {
   --background: #0f0f1a;
   --foreground: #ffffff;
